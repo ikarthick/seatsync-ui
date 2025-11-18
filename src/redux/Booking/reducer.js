@@ -1,0 +1,51 @@
+import {
+  FETCH_DC_REQUEST,
+  FETCH_DC_SUCCESS,
+  FETCH_DC_FAILURE,
+  SET_FORM_DATA,
+  RESET_FORM,FETCH_AVAILABLE_SEATS_REQUEST, FETCH_AVAILABLE_SEATS_SUCCESS, FETCH_AVAILABLE_SEATS_FAILURE
+} from "./actionTypes";
+
+const initialState = {
+  loading: false,
+  error: null,
+  dcData: [],   // API response stored here
+  dates:[],
+  availableSeats: [],
+  bookingType: "",
+  city: "",
+  branch: "",
+  block: "",
+  wing: "",
+  // seatType: "",
+  // row: "",
+  seatNumber: "",
+  // startTime: "",
+  // endTime: ""
+};
+
+export const bookingReducer = (state = initialState, action) => {
+  switch (action.type) {
+    case FETCH_DC_REQUEST:
+      return { ...state, loading: true, error: null };
+    case FETCH_DC_SUCCESS:
+      return { ...state, loading: false, dcData: action.payload };
+    case FETCH_DC_FAILURE:
+      return { ...state, loading: false, error: action.payload };
+      case FETCH_AVAILABLE_SEATS_REQUEST:
+      return { ...state, loadingSeats: true, errorSeats: null };
+    case FETCH_AVAILABLE_SEATS_SUCCESS:
+      return { ...state, loadingSeats: false, availableSeats: action.payload };
+    case FETCH_AVAILABLE_SEATS_FAILURE:
+      return { ...state, loadingSeats: false, errorSeats: action.payload };
+    case SET_FORM_DATA:
+      return {
+        ...state,
+        [action.payload.field]: action.payload.value,
+      };
+    case RESET_FORM:
+      return initialState;
+    default:
+      return state;
+  }
+};
