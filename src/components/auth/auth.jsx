@@ -19,8 +19,7 @@ const LoginPage = () => {
       // Fake API call (replace with real backend)
       if (employeeId && password === "password") {
 
-        dispatch(loginSuccess({ employeeId }));
-        alert("Login successful!");
+        dispatch(loginSuccess({ employeeId }));       
         navigate("/booked-seats");
       } else {
         dispatch(loginFailure("Invalid credentials"));

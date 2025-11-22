@@ -6,34 +6,34 @@ import { useSelector, useDispatch } from "react-redux";
 import { selectBooking } from "../../redux/Booking/selectors";
 import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
 import { useEffect } from "react";
-import  LoadingOverlay  from '../../sharedComponent/Loading/loading';
-import { fetchTicketDetails } from "../../redux/BookedTickets/actions";  //Booked tickets
+import LoadingOverlay from '../../sharedComponent/Loading/loading';
+import { fetchTicketDetails, cancelTicket } from "../../redux/BookedTickets/actions";  //Booked tickets
 import { BookedTickets, BookedSeatsLoading } from "../../redux/BookedTickets/selectors";
 
 function BookedTicketsPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const ticketList = useSelector(BookedTickets);  
+  const ticketList = useSelector(BookedTickets);
   const loading = useSelector(BookedSeatsLoading);
   const { employeeId } = useSelector((state) => state.auth);
   console.log("ticketList", ticketList);
   const booking = useSelector(selectBooking);
 
-    // Fetch API data on mount
-    useEffect(() => {
-       
-          console.log("Employee ID in QRScanner:", employeeId);
-      const fetchData = async () => {
-        try {
-          console.log("fetchTicketDetails func fired");
-          dispatch(fetchTicketDetails(employeeId));
-        }
-        catch {
-          console.log("error");
-        }
+  // Fetch API data on mount
+  useEffect(() => {
+
+    console.log("Employee ID in QRScanner:", employeeId);
+    const fetchData = async () => {
+      try {
+        console.log("fetchTicketDetails func fired");
+        dispatch(fetchTicketDetails(employeeId));
       }
-      
-    
+      catch {
+        console.log("error");
+      }
+    }
+
+
     fetchData();
   }, [dispatch]);
 
@@ -66,7 +66,7 @@ function BookedTicketsPage() {
           >
             {/* Date Badge */}
             <Box sx={{ backgroundColor: 'primary.main', color: 'white', p: 1.5 }}>
-               
+
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '16px' }}>
                 📅 {data.bookingDate}
               </Typography>
@@ -84,18 +84,25 @@ function BookedTicketsPage() {
                 <Typography variant="body2" fontWeight="bold">
                   💺 Seat No: {data.seatName}
                 </Typography>
+                <Typography variant="body2" fontWeight="bold">
+                  Status: {data.currentStatus}
+                </Typography>
               </Stack>
             </CardContent>
 
-            {/* Actions */}
-            <CardActions sx={{ justifyContent: 'flex-end', p: 2 }}>
-              <Button size="small" color="error" variant="outlined">
-                Cancel
-              </Button>
-              <Button size="small" color="primary" variant="contained">
-                Reschedule
-              </Button>
-            </CardActions>
+            {/* Actions */}{data.currentStatus === "BOOKED" &&
+              <CardActions sx={{ justifyContent: 'flex-end', p: 2 }}>
+                <Button size="small" color="error" variant="outlined"
+                  onClick={() => {
+                    dispatch(cancelTicket(data.bookingId, data.waitListId))
+                      .then(() => dispatch(fetchTicketDetails(employeeId)));
+                  }}
+                >
+                  Cancel
+                </Button>
+              </CardActions>
+            }
+
           </Paper>
         ))
       ) : (
