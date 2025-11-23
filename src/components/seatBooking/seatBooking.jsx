@@ -23,7 +23,7 @@ import {
   selectBookingType,
   selectBooking, selectAvailabilityList, selectBookingSuccess, selectBookingError
 } from "../../redux/Booking/selectors";
-import { setFormData, resetForm, fetchDcDetails, fetchAvailableSeats, bookSeat } from "../../redux/Booking/actions";
+import { setFormData, resetForm, fetchDcDetails, fetchAvailableSeats, bookSeat,resetFormExceptDates } from "../../redux/Booking/actions";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs from "dayjs";
 import { PickersDay } from "@mui/x-date-pickers/PickersDay";
@@ -47,6 +47,7 @@ function SeatBooking() {
   const bookingSuccessful = useSelector(selectBookingSuccess);
   const bookingErrors = useSelector(selectBookingError);
   const availabilityList = useSelector(selectAvailabilityList);
+  console.log("Availability List in Component:", availabilityList);
   const dcData = useSelector(selectDcData);
   const loading = useSelector(selectLoading);
   const error = useSelector(selectError);
@@ -166,21 +167,30 @@ function SeatBooking() {
     dispatch(resetForm());
   };  
 
-  const handleDateChange = (newDate) => {
-    console.log("newDate", newDate)
-    const formatted = newDate.format("YYYY-MM-DD");
-    // allow multiple selection
-    let updatedDates = [...dates];
-    if (updatedDates.includes(formatted)) {
-      updatedDates = updatedDates.filter((d) => d !== formatted);
-    } else {
-      updatedDates.push(formatted);
-      console.log("dates", formatted)
-    }
-    console.log("dates1", formatted)
-    dispatch(setFormData("dates", updatedDates));
-    console.log("dates2", formatted)
-  };
+ const handleDateChange = (newDate) => {
+  console.log("Selected date:", newDate);    
+  const formatted = newDate.format("YYYY-MM-DD");
+
+  let updatedDates = [...dates];
+  if (updatedDates.includes(formatted)) {
+    // remove if already selected
+    updatedDates = updatedDates.filter((d) => d !== formatted);
+  } else {
+    // add if not selected
+    updatedDates.push(formatted);
+  }
+
+  // Always update dates in form
+  dispatch(setFormData("dates", updatedDates));
+
+  // 🔹 Reset form except dates if user has clicked 2nd time onwards
+  if (updatedDates.length > 1) {
+    dispatch(resetFormExceptDates(updatedDates));
+  }
+};
+
+
+
 
   return (loading ? (<div><LoadingOverlay loading={loading} /> </div>) :
     <Box sx={{ flexGrow: 1, p: 3, height: "100%" }}>
@@ -327,20 +337,21 @@ function SeatBooking() {
                           color: "white",
                           borderRadius: "8px",
                           flexShrink: 0,
-                          cursor: item.currentStatus === "BOOKED" ? "not-allowed" : "pointer", // disable click
+                          disabled: item.status === "ALREADY_BOOKED",
+                          cursor: item.status === "ALREADY_BOOKED" ? "not-allowed" : "pointer", // disable click
                           "&:hover": { opacity: 0.8 },
                         }}
                       >
                         <Tooltip
                           title={
-                            item.currentStatus === "BOOKED"
+                            item.status === "ALREADY_BOOKED"
                               ? "This date is already booked"
                               : "Click to select/unselect"
                           }
                         >
                           <CardContent
                             onClick={() => {
-                              if (item.currentStatus === "BOOKED") {
+                              if (item.status === "ALREADY_BOOKED") {
                                 // ❌ Do nothing if already booked
                                 return;
                               }
@@ -354,7 +365,7 @@ function SeatBooking() {
                             <Typography variant="h6">{item.date}</Typography>
                             <Typography>Available Seats: {item.availableSeats}</Typography>
                             {item.availableSeats === 0 && (
-                              <Typography>Current Status: {item.status}</Typography>
+                              <Typography>Status: {item.status}</Typography>
                             )}
                           </CardContent>
                         </Tooltip>

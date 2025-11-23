@@ -128,3 +128,9 @@ export const bookSeat = (payload,navigate) => async (dispatch) => {
   }
 };
 
+export const RESET_FORM_EXCEPT_DATES = "RESET_FORM_EXCEPT_DATES";
+
+export const resetFormExceptDates = (dates) => ({
+  type: RESET_FORM_EXCEPT_DATES,
+  payload: dates,
+});

@@ -5,7 +5,7 @@ import {
   SET_FORM_DATA,
   RESET_FORM,FETCH_AVAILABLE_SEATS_REQUEST, FETCH_AVAILABLE_SEATS_SUCCESS, FETCH_AVAILABLE_SEATS_FAILURE, BOOK_SEAT_REQUEST,
   BOOK_SEAT_SUCCESS,
-  BOOK_SEAT_FAILURE,CLEAR_BOOKING_MESSAGE,
+  BOOK_SEAT_FAILURE,CLEAR_BOOKING_MESSAGE,RESET_FORM_EXCEPT_DATES
 } from "./actionTypes";
 
 const initialState = {
@@ -71,6 +71,18 @@ export const bookingReducer = (state = initialState, action) => {
       };
     case RESET_FORM:
       return initialState;
+    case RESET_FORM_EXCEPT_DATES:
+  return {
+    ...state,
+    city: "",
+    branch: "",
+    block: "",
+    wing: "",
+    bookingType: "",
+    // keep only dates
+    dates: action.payload,
+  };
+  
     default:
       return state;
   }
