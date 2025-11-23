@@ -1,18 +1,17 @@
 import React from "react";
-import { Box, Typography, Card, CardContent, Grid, Fab, CardHeader, CardActions, Button, Paper, Stack } from "@mui/material";
-import AddIcon from "@mui/icons-material/Add";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
+import { Box, Typography, CardContent, Fab, CardActions, Button, Paper, Stack } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import { selectBooking } from "../../redux/Booking/selectors";
 import QrCodeScannerIcon from "@mui/icons-material/QrCodeScanner";
-import { useEffect } from "react";
 import LoadingOverlay from '../../sharedComponent/Loading/loading';
-import { fetchTicketDetails, cancelTicket } from "../../redux/BookedTickets/actions";  //Booked tickets
-import { BookedTickets, BookedSeatsLoading } from "../../redux/BookedTickets/selectors";
-import LightbulbIcon from "@mui/icons-material/Lightbulb";
-
 import CustomSnackbar from "../../sharedComponent/snackBar/CustomSnackbar";
+import { fetchTicketDetails, cancelTicket } from "../../redux/BookedTickets/actions";
+import { BookedTickets, BookedSeatsLoading } from "../../redux/BookedTickets/selectors";
 import { CLEAR_CANCEL_MESSAGE } from "../../redux/BookedTickets/actionTypes";
+import LightbulbIcon from "@mui/icons-material/Lightbulb";
 
 function BookedTicketsPage() {
   const navigate = useNavigate();
@@ -21,16 +20,13 @@ function BookedTicketsPage() {
   const teamSuggestion = ticketList?.teamProximitySugguestionDto;
   const loading = useSelector(BookedSeatsLoading);
   const { employeeId } = useSelector((state) => state.auth);
-  console.log("ticketList", ticketList);
-  const booking = useSelector(selectBooking);
   const cancelSuccess = useSelector((state) => state.ticketsLists.cancelSuccess);
   const cancelError = useSelector((state) => state.ticketsLists.cancelError);
-
   const [snackbarOpen, setSnackbarOpen] = React.useState(false);
   const [snackbarMessage, setSnackbarMessage] = React.useState("");
   const [snackbarSeverity, setSnackbarSeverity] = React.useState("success");
 
-   React.useEffect(() => {
+  useEffect(() => {
     if (cancelSuccess) {
       setSnackbarMessage(cancelSuccess);
       setSnackbarSeverity("success");
@@ -44,19 +40,14 @@ function BookedTicketsPage() {
 
   // Fetch API data on mount
   useEffect(() => {
-
-    console.log("Employee ID in QRScanner:", employeeId);
     const fetchData = async () => {
       try {
-        console.log("fetchTicketDetails func fired");
         dispatch(fetchTicketDetails(employeeId));
       }
       catch {
         console.log("error");
       }
     }
-
-
     fetchData();
   }, [dispatch]);
 
@@ -67,35 +58,34 @@ function BookedTicketsPage() {
     navigate("/scan-qr");
   }
   const handleAttendance = async () => {
-  try {
-    const response = await fetch(
-      `https://seatn-sync-production.up.railway.app/infy/attendance?empId=${employeeId}&location=chennai&status=IN`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+    try {
+      const response = await fetch(
+        `https://seatn-sync-production.up.railway.app/infy/attendance?empId=${employeeId}&location=chennai&status=IN`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      if (!response.ok) {
+        throw new Error("Failed to mark attendance");
       }
-    );
-
-    if (!response.ok) {
-      throw new Error("Failed to mark attendance");
+      const data = await response.json();      
+      setSnackbarMessage(data.message);
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
+    } catch (error) {
+      console.error("Attendance error:", error);
+      setSnackbarMessage("Something went wrong while marking attendance!");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
     }
-
-    const data = await response.json();
-    console.log("Attendance success:", data);
-
-    alert("Attendance marked successfully!");
-  } catch (error) {
-    console.error("Attendance error:", error);
-    alert("Something went wrong while marking attendance!");
-  }
-};
+  };
   return (
     <Box sx={{ p: 2, position: "relative", minHeight: "100vh", bgcolor: "#f5f5f5" }}>
       <Typography variant="h5" gutterBottom sx={{ fontSize: '18px', fontWeight: 'bold', mb: 3 }}>
         🎟️ Your Booked Tickets
       </Typography>
       <LoadingOverlay loading={loading} />
-
       {ticketList?.empSeats?.length ? (
         ticketList?.empSeats?.map((data, idx) => (
           <Paper
@@ -112,12 +102,10 @@ function BookedTicketsPage() {
           >
             {/* Date Badge */}
             <Box sx={{ backgroundColor: 'primary.main', color: 'white', p: 1.5 }}>
-
               <Typography variant="subtitle1" sx={{ fontWeight: 'bold', fontSize: '16px' }}>
                 📅 {data.bookingDate}
               </Typography>
             </Box>
-
             {/* Ticket Content */}
             <CardContent>
               <Stack spacing={1}>
@@ -135,7 +123,6 @@ function BookedTicketsPage() {
                 </Typography>
               </Stack>
             </CardContent>
-
             {/* Actions */}{data.currentStatus === "BOOKED" &&
               <CardActions sx={{ justifyContent: 'flex-end', p: 2 }}>
                 <Button size="small" color="error" variant="outlined"
@@ -148,7 +135,6 @@ function BookedTicketsPage() {
                 </Button>
               </CardActions>
             }
-
           </Paper>
         ))
       ) : (
@@ -156,43 +142,36 @@ function BookedTicketsPage() {
           No tickets booked yet.
         </Typography>
       )}
-
-
       {teamSuggestion && (
-  <Paper
-    elevation={3}
-    sx={{
-      p: 2,
-      my: 2,
-      mx: 'auto',
-      maxWidth: 600,
-      borderRadius: 3,
-      bgcolor: "#fff9c4", // Light yellow
-      display: "flex",
-      alignItems: "flex-start",
-      gap: 2
-    }}
-  >
-    <LightbulbIcon sx={{ color: "#fbc02d", fontSize: 40 }} />
+        <Paper
+          elevation={3}
+          sx={{
+            p: 2,
+            my: 2,
+            mx: 'auto',
+            maxWidth: 600,
+            borderRadius: 3,
+            bgcolor: "#fff9c4", // Light yellow
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 2
+          }}
+        >
+          <LightbulbIcon sx={{ color: "#fbc02d", fontSize: 40 }} />
 
-    <Box>
-      <Typography variant="subtitle1" fontWeight="bold">
-        Suggested Seating Area
-      </Typography>
-
-      <Typography variant="body2">
-        📍 {teamSuggestion.dcName}, {teamSuggestion.blockName}
-      </Typography>
-
-      <Typography variant="body2">
-        🏢 {teamSuggestion.wingName}
-      </Typography>
-    </Box>
-  </Paper>
-)}
-
-
-
+          <Box>
+            <Typography variant="subtitle1" fontWeight="bold">
+              Suggested Seating Area
+            </Typography>
+            <Typography variant="body2">
+              📍 {teamSuggestion.dcName}, {teamSuggestion.blockName}
+            </Typography>
+            <Typography variant="body2">
+              🏢 {teamSuggestion.wingName}
+            </Typography>
+          </Box>
+        </Paper>
+      )}
       {/* Floating + icon */}
       <Fab
         color="primary"
@@ -208,14 +187,13 @@ function BookedTicketsPage() {
         <QrCodeScannerIcon />
       </Fab>
       {/* New Attendance FAB */}
-<Fab
-  onClick={handleAttendance}
-  color="secondary"
-  sx={{ position: "fixed", bottom: 16, right: 150 }}
->
-  <Typography sx={{ fontWeight: 'bold' }}>IN</Typography>
-</Fab>
-
+      <Fab
+        onClick={handleAttendance}
+        color="secondary"
+        sx={{ position: "fixed", bottom: 16, right: 150 }}
+      >
+        <Typography sx={{ fontWeight: 'bold' }}>IN</Typography>
+      </Fab>
       <CustomSnackbar
         open={snackbarOpen}
         message={snackbarMessage}

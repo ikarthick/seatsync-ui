@@ -340,7 +340,7 @@ function SeatBooking() {
                       <CardContent>
                         <Typography variant="h6">{item.date}</Typography>
                         <Typography>Available Seats: {item.availableSeats}</Typography>
-                        {item.availableSeats === 0 && (<Typography>CurrentStatus: {item.status}</Typography>)}
+                        {item.availableSeats === 0 && (<Typography>Current Status: {item.status}</Typography>)}
                       </CardContent>
                     </Card>
                   </>

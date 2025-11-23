@@ -15,10 +15,8 @@ const LoginPage = () => {
 
   const handleLogin = async () => {
     dispatch(loginStart());
-    try {
-      // Fake API call (replace with real backend)
+    try {      
       if (employeeId && password === "password") {
-
         dispatch(loginSuccess({ employeeId }));       
         navigate("/booked-seats");
       } else {
