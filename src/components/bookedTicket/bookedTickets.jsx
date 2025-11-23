@@ -11,6 +11,9 @@ import { fetchTicketDetails, cancelTicket } from "../../redux/BookedTickets/acti
 import { BookedTickets, BookedSeatsLoading } from "../../redux/BookedTickets/selectors";
 import LightbulbIcon from "@mui/icons-material/Lightbulb";
 
+import CustomSnackbar from "../../sharedComponent/snackBar/CustomSnackbar";
+import { CLEAR_CANCEL_MESSAGE } from "../../redux/BookedTickets/actionTypes";
+
 function BookedTicketsPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -20,6 +23,24 @@ function BookedTicketsPage() {
   const { employeeId } = useSelector((state) => state.auth);
   console.log("ticketList", ticketList);
   const booking = useSelector(selectBooking);
+  const cancelSuccess = useSelector((state) => state.ticketsLists.cancelSuccess);
+  const cancelError = useSelector((state) => state.ticketsLists.cancelError);
+
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+  const [snackbarMessage, setSnackbarMessage] = React.useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = React.useState("success");
+
+   React.useEffect(() => {
+    if (cancelSuccess) {
+      setSnackbarMessage(cancelSuccess);
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
+    } else if (cancelError) {
+      setSnackbarMessage("Unable to cancel, please try again!");
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    }
+  }, [cancelSuccess, cancelError]);
 
   // Fetch API data on mount
   useEffect(() => {
@@ -194,6 +215,16 @@ function BookedTicketsPage() {
 >
   <Typography sx={{ fontWeight: 'bold' }}>IN</Typography>
 </Fab>
+
+      <CustomSnackbar
+        open={snackbarOpen}
+        message={snackbarMessage}
+        severity={snackbarSeverity}
+        onClose={() => {
+          setSnackbarOpen(false);
+          dispatch({ type: CLEAR_CANCEL_MESSAGE }); // ✅ clear after close
+        }}
+      />
     </Box>
   );
 }

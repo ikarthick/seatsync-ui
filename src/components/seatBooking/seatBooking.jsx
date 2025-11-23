@@ -28,7 +28,7 @@ import {
   selectDates,
   selectBookingType,
   selectStartTime,
-  selectEndTime, selectBooking, availableSeats, loadingSeats, errorSeats, selectAvailabilityList
+  selectEndTime, selectBooking, availableSeats, loadingSeats, errorSeats, selectAvailabilityList,selectBookingSuccess, selectBookingError
 } from "../../redux/Booking/selectors";
 import { setFormData, resetForm, fetchDcDetails, fetchAvailableSeats, bookSeat } from "../../redux/Booking/actions";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
@@ -38,7 +38,8 @@ import { styled } from "@mui/material/styles";
 import { LocalizationProvider } from "@mui/x-date-pickers";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import LoadingOverlay from '../../sharedComponent/Loading/loading';
-
+import CustomSnackbar from "../../sharedComponent/snackBar/CustomSnackbar";
+import { CLEAR_BOOKING_MESSAGE } from "../../redux/Booking/actionTypes";
 
 function SeatBooking() {
   const formData = useSelector((state) => state);
@@ -55,9 +56,12 @@ function SeatBooking() {
   const seatNumber = useSelector(selectSeatNumber);
   const dates = useSelector(selectDates);
   const bookingType = useSelector(selectBookingType);
+
   const availableSeats = useSelector((state) => state.booking.availableSeats);
   const loadingSeats = useSelector((state) => state.booking.loadingSeats);
   const errorSeats = useSelector((state) => state.booking.errorSeats);
+  const bookingSuccessful = useSelector(selectBookingSuccess);
+  const bookingErrors = useSelector(selectBookingError);
   const availabilityList = useSelector(selectAvailabilityList);
   console.log("FullDayAvailability availableList:", availabilityList);
 
@@ -80,6 +84,22 @@ function SeatBooking() {
   console.log("Full booking state:", booking);
   const { employeeId } = useSelector((state) => state.auth);
   console.log("employeeIdBook a seat", employeeId)
+
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+  const [snackbarMessage, setSnackbarMessage] = React.useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = React.useState("success");
+
+  React.useEffect(() => {
+    if (bookingSuccessful) {
+      setSnackbarMessage("Booking Successful!");
+      setSnackbarSeverity("success");
+      setSnackbarOpen(true);
+    } else if (bookingErrors) {
+      setSnackbarMessage("Unable to book seat. Please try again.");      
+      setSnackbarSeverity("error");
+      setSnackbarOpen(true);
+    }
+  }, [bookingSuccessful, bookingErrors]);
 
 
   // Fetch API data on mount
@@ -191,9 +211,9 @@ function SeatBooking() {
     console.log("Booking Payload:", payload);
 
     // Dispatch Redux thunk
-    dispatch(bookSeat(payload));
+    dispatch(bookSeat(payload,navigate));
     dispatch(resetForm());
-    navigate("/booked-seats");
+    // navigate("/booked-seats");
 
   };
 
@@ -548,6 +568,16 @@ function SeatBooking() {
           </Button>
         </span>
       </Tooltip>
+
+       <CustomSnackbar
+        open={snackbarOpen}
+        message={snackbarMessage}
+        severity={snackbarSeverity}
+        onClose={() => {
+          setSnackbarOpen(false);
+          dispatch({ type: CLEAR_BOOKING_MESSAGE }); // ✅ clear Redux message
+  }}
+      />
 
     </Box>
 

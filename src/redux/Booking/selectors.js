@@ -22,7 +22,8 @@ export const selectError = (state) => state.booking.error;
 
 
 export const loadingSeats = (state) => state.booking.loadingSeats;
-export const errorSeats = (state) => state.booking.errorSeats;
+export const selectBookingError = (state) => state.booking.bookingError;
+export const selectBookingSuccess = (state) => state.booking.bookingSuccess;
 
 export const selectFullDayAvailability = (state) =>  state.booking.fullDayAvailability;
 

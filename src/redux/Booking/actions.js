@@ -3,7 +3,7 @@ import { SET_FORM_DATA, RESET_FORM, FETCH_DC_REQUEST, FETCH_DC_SUCCESS, FETCH_DC
   FETCH_AVAILABLE_SEATS_REQUEST, FETCH_AVAILABLE_SEATS_SUCCESS, FETCH_AVAILABLE_SEATS_FAILURE,
 BOOK_SEAT_REQUEST,
   BOOK_SEAT_SUCCESS,
-  BOOK_SEAT_FAILURE,
+  BOOK_SEAT_FAILURE
 } from "./actionTypes";
 import axios from "axios";
 
@@ -102,7 +102,7 @@ export const fetchAvailableSeats = (wingId, duration, dates, timeSlot) => async 
 //Thunk Action to book a seat
 // src/redux/actions.js
 
-export const bookSeat = (payload) => async (dispatch) => {
+export const bookSeat = (payload,navigate) => async (dispatch) => {
   dispatch(bookSeatRequest());
   try {
     const response = await axios.post(
@@ -117,9 +117,12 @@ export const bookSeat = (payload) => async (dispatch) => {
     );
 
     dispatch(bookSeatSuccess(response.data));
+    setTimeout(() => {
+    navigate("/booked-seats");
+  }, 2000);
     console.log("Booking Success:", response.data);
   } catch (error) {
-    dispatch(bookSeatFailure(error.message));
+    dispatch(bookSeatFailure("error"));
     console.error("Booking Error:", error);
   }
 };

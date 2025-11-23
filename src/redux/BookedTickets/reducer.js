@@ -4,7 +4,7 @@ import {
   RESET_FORM,
   CANCEL_TICKET_REQUEST,
   CANCEL_TICKET_SUCCESS,
-  CANCEL_TICKET_FAILURE,
+  CANCEL_TICKET_FAILURE,CLEAR_CANCEL_MESSAGE
 } from "./actionTypes";
 
 const initialState = {
@@ -32,17 +32,27 @@ export const ticketsListsReducer = (state = initialState, action) => {
     case FETCH_TICKET_SUCCESS:
       return { ...state, loading: false, bookedData: action.payload };
     case FETCH_TICKET_FAILURE:
-      return { ...state, loading: false, error: action.payload };
+      return { ...state, loading: false, error: "error" };
     case CANCEL_TICKET_REQUEST:
-      return { ...state, loading: true };
-    case CANCEL_TICKET_SUCCESS:
-      return {
-        ...state,
-        loading: false,
-        tickets: action.payload
-      };
-    case CANCEL_TICKET_FAILURE:
-      return { ...state, loading: false, error: action.error };  
+  return { ...state, loading: true, cancelSuccess: null, cancelError: null };
+
+case CANCEL_TICKET_SUCCESS:
+  return {
+    ...state,
+    loading: false,
+    cancelSuccess: "Booking canceled!",   // ✅ message for snackbar
+    tickets: action.payload,
+  };
+
+case CANCEL_TICKET_FAILURE:
+  return {
+    ...state,
+    loading: false,
+    cancelError: "error", // ❌ message for snackbar
+  };
+
+case CLEAR_CANCEL_MESSAGE:
+  return { ...state, cancelSuccess: null, cancelError: null };  
     case SET_FORM_DATA:
       return {
         ...state,

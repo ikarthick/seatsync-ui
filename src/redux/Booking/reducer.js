@@ -5,7 +5,7 @@ import {
   SET_FORM_DATA,
   RESET_FORM,FETCH_AVAILABLE_SEATS_REQUEST, FETCH_AVAILABLE_SEATS_SUCCESS, FETCH_AVAILABLE_SEATS_FAILURE, BOOK_SEAT_REQUEST,
   BOOK_SEAT_SUCCESS,
-  BOOK_SEAT_FAILURE,
+  BOOK_SEAT_FAILURE,CLEAR_BOOKING_MESSAGE,
 } from "./actionTypes";
 
 const initialState = {
@@ -25,11 +25,12 @@ const initialState = {
   seatNumber: "",
   // startTime: "",
   // endTime: ""
-   bookings: [],
+  bookings: [],
   bookingLoading: false,
   bookingError: null,
   bookingSuccess: null,
 };
+
 
 export const bookingReducer = (state = initialState, action) => {
   switch (action.type) {
@@ -57,10 +58,12 @@ export const bookingReducer = (state = initialState, action) => {
         ...state,
         bookingLoading: false,
         bookingSuccess: "Seat booked successfully!",
-        bookings: [...state.bookings, action.payload],
+        bookings: [...state.bookings, action.payload],        
       };
     case BOOK_SEAT_FAILURE:
-      return { ...state, bookingLoading: false, bookingError: action.payload };  
+      return { ...state, bookingLoading: false, bookingError: "error" };
+    case CLEAR_BOOKING_MESSAGE:
+      return { ...state, bookingSuccess: null, bookingError: null };  
     case SET_FORM_DATA:
       return {
         ...state,

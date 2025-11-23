@@ -17,7 +17,7 @@ export const authReducer = (state = initialState, action) => {
         ...state,
         loading: false,
         employeeId: action.payload.employeeId,
-       
+               
       };
     case LOGIN_FAILURE:
       return { ...state, loading: false, error: action.error };
