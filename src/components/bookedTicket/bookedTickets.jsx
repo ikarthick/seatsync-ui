@@ -9,11 +9,13 @@ import { useEffect } from "react";
 import LoadingOverlay from '../../sharedComponent/Loading/loading';
 import { fetchTicketDetails, cancelTicket } from "../../redux/BookedTickets/actions";  //Booked tickets
 import { BookedTickets, BookedSeatsLoading } from "../../redux/BookedTickets/selectors";
+import LightbulbIcon from "@mui/icons-material/Lightbulb";
 
 function BookedTicketsPage() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const ticketList = useSelector(BookedTickets);
+  const teamSuggestion = ticketList?.teamProximitySugguestionDto;
   const loading = useSelector(BookedSeatsLoading);
   const { employeeId } = useSelector((state) => state.auth);
   console.log("ticketList", ticketList);
@@ -43,6 +45,29 @@ function BookedTicketsPage() {
   const handleQRScan = () => {
     navigate("/scan-qr");
   }
+  const handleAttendance = async () => {
+  try {
+    const response = await fetch(
+      `https://seatn-sync-production.up.railway.app/infy/attendance?empId=${employeeId}&location=chennai&status=IN`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("Failed to mark attendance");
+    }
+
+    const data = await response.json();
+    console.log("Attendance success:", data);
+
+    alert("Attendance marked successfully!");
+  } catch (error) {
+    console.error("Attendance error:", error);
+    alert("Something went wrong while marking attendance!");
+  }
+};
   return (
     <Box sx={{ p: 2, position: "relative", minHeight: "100vh", bgcolor: "#f5f5f5" }}>
       <Typography variant="h5" gutterBottom sx={{ fontSize: '18px', fontWeight: 'bold', mb: 3 }}>
@@ -50,8 +75,8 @@ function BookedTicketsPage() {
       </Typography>
       <LoadingOverlay loading={loading} />
 
-      {ticketList?.length ? (
-        ticketList.map((data, idx) => (
+      {ticketList?.empSeats?.length ? (
+        ticketList?.empSeats?.map((data, idx) => (
           <Paper
             key={idx}
             elevation={3}
@@ -112,6 +137,41 @@ function BookedTicketsPage() {
       )}
 
 
+      {teamSuggestion && (
+  <Paper
+    elevation={3}
+    sx={{
+      p: 2,
+      my: 2,
+      mx: 'auto',
+      maxWidth: 600,
+      borderRadius: 3,
+      bgcolor: "#fff9c4", // Light yellow
+      display: "flex",
+      alignItems: "flex-start",
+      gap: 2
+    }}
+  >
+    <LightbulbIcon sx={{ color: "#fbc02d", fontSize: 40 }} />
+
+    <Box>
+      <Typography variant="subtitle1" fontWeight="bold">
+        Suggested Seating Area
+      </Typography>
+
+      <Typography variant="body2">
+        📍 {teamSuggestion.dcName}, {teamSuggestion.blockName}
+      </Typography>
+
+      <Typography variant="body2">
+        🏢 {teamSuggestion.wingName}
+      </Typography>
+    </Box>
+  </Paper>
+)}
+
+
+
       {/* Floating + icon */}
       <Fab
         color="primary"
@@ -126,6 +186,14 @@ function BookedTicketsPage() {
         sx={{ position: "fixed", bottom: 16, right: 80 }}>
         <QrCodeScannerIcon />
       </Fab>
+      {/* New Attendance FAB */}
+<Fab
+  onClick={handleAttendance}
+  color="secondary"
+  sx={{ position: "fixed", bottom: 16, right: 150 }}
+>
+  <Typography sx={{ fontWeight: 'bold' }}>IN</Typography>
+</Fab>
     </Box>
   );
 }
